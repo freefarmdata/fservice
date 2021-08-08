@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(
-    name='pystate',
+    name='fservice',
     version='0.0.1',    
     description='Stateful service management system',
-    url='https://github.com/freefarmdata/pystate',
+    url='https://github.com/freefarmdata/fservice',
     author='Jack Mead',
     author_email='jackmead515@gmail.com',
     license='BSD 2-clause',
-    packages=['pystate'],
+    packages=['fservice'],
     install_requires=[],
     classifiers=[
         'Development Status :: 1 - Planning',

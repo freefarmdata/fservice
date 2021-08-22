@@ -11,7 +11,7 @@ class Trigger(threading.Thread):
         self._stop_event = threading.Event()
         self._stopped = False
         self._has_started = False
-        self._block_time = 5E9
+        self._block_time = 5
         self._trigger = threading.Semaphore(0)
 
 
@@ -60,10 +60,14 @@ class Trigger(threading.Thread):
             return
 
         while not self._stop_event.is_set():
-            triggered = self._trigger.acquire(blocking=True, timeout=self._block_time)
+            triggered = self._trigger.acquire(timeout=self._block_time)
             if triggered:
                 self.try_trigger()
         self.try_end()
+
+
+    def set_timeout(self, timeout=5):
+        self._block_time = timeout
 
 
     def stop(self):

@@ -1,0 +1,8 @@
+setup.py
+fservice/__init__.py
+fservice/state.py
+fservice/tservice.py
+fservice.egg-info/PKG-INFO
+fservice.egg-info/SOURCES.txt
+fservice.egg-info/dependency_links.txt
+fservice.egg-info/top_level.txt

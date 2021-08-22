@@ -8,8 +8,10 @@ logger = logging.getLogger(__name__)
 
 settings = {}
 services = {}
+triggers = {}
 
 _setting_lock = threading.Lock()
+
 
 def register_service(service_name, instance):
   global services
@@ -20,6 +22,19 @@ def register_service(service_name, instance):
     raise Exception(f'global is a reserved service name')
   
   services[service_name] = {
+    'lock': threading.Lock(),
+    'create': instance,
+    'instance': None,
+    'settings': {},
+  }
+
+
+def register_trigger(trigger_name, instance):
+  global triggers
+  if trigger_name in triggers:
+    raise Exception(f'{trigger_name} already exists in triggers')
+  
+  triggers[trigger_name] = {
     'lock': threading.Lock(),
     'create': instance,
     'instance': None,
@@ -60,6 +75,43 @@ def start_service(service_name):
         services[service_name]['instance'].start()
 
 
+def start_triggers():
+  global triggers
+  for trigger_name in triggers:
+    start_trigger(trigger_name)
+  
+
+def start_trigger(trigger_name):
+  global triggers
+  logger.info(f'Start trigger {trigger_name}')
+  if trigger_name in triggers:
+    with triggers[trigger_name]['lock']:
+      if triggers[trigger_name]['instance'] is None:
+
+        if triggers[trigger_name]['settings'].get('disabled'):
+          logger.info(f'Trigger {trigger_name} is disabled')
+          return
+
+        triggers[trigger_name]['instance'] = triggers[trigger_name]['create']()
+        triggers[trigger_name]['instance'].start()
+
+
+def stop_triggers():
+  global triggers
+  for trigger_name in triggers:
+    with triggers[trigger_name]['lock']:
+      logger.info(f'Stop trigger {trigger_name}')
+      if triggers[trigger_name]['instance'] is not None:
+        triggers[trigger_name]['instance'].stop()
+  for trigger_name in triggers:
+    with triggers[trigger_name]['lock']:
+      if triggers[trigger_name]['instance'] is not None:
+        while not triggers[trigger_name]['instance'].is_stopped():
+          time.sleep(0.01)
+      triggers[trigger_name]['instance'] = None
+      logger.info(f'Trigger {trigger_name} stopped!')
+
+
 def stop_services():
   global services
   for service_name in services:
@@ -98,16 +150,25 @@ def update_service(service_name, message):
         services[service_name]['instance'].update(message)
 
 
+def update_trigger(trigger_name):
+  global triggers
+  logger.info(f'Update trigger {trigger_name}')
+  if trigger_name in triggers:
+    with triggers[trigger_name]['lock']:
+      if triggers[trigger_name]['instance'] is not None:
+        triggers[trigger_name]['instance'].trigger()
+
+
 def set_global_setting(key, value):
   global settings
   with _setting_lock:
     settings[key] = value
 
 
-def get_global_setting(key):
+def get_global_setting(key, default=None):
   global settings
   with _setting_lock:
-    return settings.get(key)
+    return settings.get(key, default)
 
 
 def set_service_setting(service_name, key, value):
@@ -117,12 +178,11 @@ def set_service_setting(service_name, key, value):
       services[service_name]['settings'][key] = value
 
 
-def get_service_setting(service_name, key):
+def get_service_setting(service_name, key, default=None):
   global services
   if service_name in services:
     with services[service_name]['lock']:
-      if key in services[service_name]['settings']:
-        return services[service_name]['settings'][key]
+      return services[service_name]['settings'].get(key, default)
 
 
 def get_service_settings(service_name):

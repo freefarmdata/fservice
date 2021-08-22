@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='fservice',
-    version='0.0.1',    
+    version='0.0.2',    
     description='Stateful service management system',
     url='https://github.com/freefarmdata/fservice',
     author='Jack Mead',

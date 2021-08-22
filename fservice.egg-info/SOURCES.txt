@@ -1,6 +1,8 @@
+README.md
 setup.py
 fservice/__init__.py
 fservice/state.py
+fservice/trigger.py
 fservice/tservice.py
 fservice.egg-info/PKG-INFO
 fservice.egg-info/SOURCES.txt

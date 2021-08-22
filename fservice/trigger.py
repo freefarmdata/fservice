@@ -15,8 +15,35 @@ class Trigger(threading.Thread):
         self._trigger = threading.Semaphore(0)
 
 
+    def run_start(self):
+        pass
+
+
     def run_trigger(self):
         pass
+
+    
+    def run_end(self):
+        pass
+
+
+    def try_start(self):
+        self._has_started = True
+        try:
+            self.run_start()
+            return True
+        except:
+            logger.exception('Unexpected error in start')
+            self._stopped = True
+            return False
+    
+
+    def try_end(self):
+        try:
+            self.run_end()
+        except:
+            logger.exception('Unexpected error in end')
+        self._stopped = True
 
 
     def try_trigger(self):
@@ -29,10 +56,14 @@ class Trigger(threading.Thread):
 
 
     def run(self):
+        if not self.try_start():
+            return
+
         while not self._stop_event.is_set():
             triggered = self._trigger.acquire(blocking=True, timeout=self._block_time)
             if triggered:
                 self.try_trigger()
+        self.try_end()
 
 
     def stop(self):

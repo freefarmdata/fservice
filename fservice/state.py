@@ -150,13 +150,13 @@ def update_service(service_name, message):
         services[service_name]['instance'].update(message)
 
 
-def update_trigger(trigger_name):
+def update_trigger(trigger_name, message=None):
   global triggers
   logger.info(f'Update trigger {trigger_name}')
   if trigger_name in triggers:
     with triggers[trigger_name]['lock']:
       if triggers[trigger_name]['instance'] is not None:
-        triggers[trigger_name]['instance'].trigger()
+        triggers[trigger_name]['instance'].trigger(message)
 
 
 def set_global_setting(key, value):

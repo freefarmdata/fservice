@@ -1,6 +1,7 @@
 import threading
 import logging
 import time
+from collections import deque
 
 logger = logging.getLogger(__name__)
 
@@ -13,13 +14,14 @@ class Trigger(threading.Thread):
         self._has_started = False
         self._block_time = 5
         self._trigger = threading.Semaphore(0)
+        self._queue = deque(maxlen=100000)
 
 
     def run_start(self):
         pass
 
 
-    def run_trigger(self):
+    def run_trigger(self, message):
         pass
 
     
@@ -48,7 +50,7 @@ class Trigger(threading.Thread):
 
     def try_trigger(self):
         try:
-            self.run_trigger()
+            self.run_trigger(self._queue.pop())
             return True
         except:
             logger.exception('Unexpected error in trigger')
@@ -74,7 +76,8 @@ class Trigger(threading.Thread):
         self._stop_event.set()
 
 
-    def trigger(self):
+    def trigger(self, message=None):
+        self._queue.appendleft(message)
         self._trigger.release()
 
 

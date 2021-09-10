@@ -1,8 +1,9 @@
 from setuptools import setup
+from fservice import __version__
 
 setup(
     name='fservice',
-    version='0.0.4',    
+    version=__version__,    
     description='Stateful service management system',
     url='https://github.com/freefarmdata/fservice',
     author='Jack Mead',

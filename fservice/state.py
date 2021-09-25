@@ -156,7 +156,11 @@ def update_trigger(trigger_name, message=None):
   if trigger_name in triggers:
     with triggers[trigger_name]['lock']:
       if triggers[trigger_name]['instance'] is not None:
-        triggers[trigger_name]['instance'].trigger(message)
+        if isinstance(message, list):
+          for m in message:
+            triggers[trigger_name]['instance'].trigger(m)
+        else:
+          triggers[trigger_name]['instance'].trigger(message)
 
 
 def set_global_setting(key, value):

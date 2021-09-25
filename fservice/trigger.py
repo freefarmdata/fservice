@@ -14,7 +14,15 @@ class Trigger(threading.Thread):
         self._has_started = False
         self._block_time = 5
         self._trigger = threading.Semaphore(0)
-        self._queue = deque(maxlen=100000)
+        self._queue = deque()
+
+    
+    def set_max_queue_size(self, max_size):
+        self._queue = deque(maxlen=max_size)
+
+    
+    def set_block_time(self, block_time):
+        self._block_time = block_time
 
 
     def run_start(self):
@@ -66,10 +74,6 @@ class Trigger(threading.Thread):
             if triggered:
                 self.try_trigger()
         self.try_end()
-
-
-    def set_timeout(self, timeout=5):
-        self._block_time = timeout
 
 
     def stop(self):
